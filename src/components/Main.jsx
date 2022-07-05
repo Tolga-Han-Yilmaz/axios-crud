@@ -5,12 +5,16 @@ const url = "https://axios-example-cw.herokuapp.com/api/tutorials";
 
 
 function Main() {
+
+  //STATE//******************************************************* */
   const [didupdate, setDidupdate] = useState(false);
+
   const [state, setState] = useState({
     title: "",
     desc: "",
   });
-  console.log(didupdate);
+
+
   const [veri, setVeri] = useState([]);
 
   const [updateVeri, setUpdateVeri] = useState({
@@ -18,7 +22,9 @@ function Main() {
     description: "",
   });
 
+  //STATE//******************************************************** */
 
+  //function that change event
   const handleChange = (e) => {
     setState({ ...state, [e.target.name]: e.target.value });
   };
@@ -27,6 +33,8 @@ function Main() {
     setUpdateVeri({ ...updateVeri, [e.target.name]: e.target.value });
   };
 
+
+
   const getAxios = async () => {
     await axios
       .get(url)
@@ -34,7 +42,7 @@ function Main() {
       .catch((err) => console.log(err));
   };
 
-
+  //Create
   const handlePost = async () => {
     await axios({
       method: "post",
@@ -53,7 +61,7 @@ function Main() {
   };
 
 
-
+  //Delete
   const handleDelete = async (Id) => {
     await axios.delete(
       `https://axios-example-cw.herokuapp.com/api/tutorials/${Id}`
@@ -63,6 +71,11 @@ function Main() {
   };
 
 
+  //Update
+
+  const handleUpdateRouter = (Id) => {
+    setUpdateVeri(...veri?.filter((item) => item.id === Id));
+  };
 
   const handlePut = async (id) => {
     await axios.put(
@@ -73,10 +86,8 @@ function Main() {
     await setDidupdate(!didupdate);
   };
 
-  const handleUpdateRouter = (Id) => {
-    setUpdateVeri(...veri?.filter((item) => item.id === Id));
-  };
 
+  //LifeCycle
   //didmount
   useEffect(() => {
     getAxios();
