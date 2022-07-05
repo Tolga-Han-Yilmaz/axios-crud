@@ -2,26 +2,41 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 const url = "https://axios-example-cw.herokuapp.com/api/tutorials";
+
+
 function Main() {
+  const [didupdate, setDidupdate] = useState(false);
   const [state, setState] = useState({
     title: "",
     desc: "",
   });
+  console.log(didupdate);
   const [veri, setVeri] = useState([]);
-//   const [updateVeri,setUpdateVeri] = useState({
-//     title: "",
-//     desc: "",
-//   });
+
+  const [updateVeri, setUpdateVeri] = useState({
+    title: "",
+    description: "",
+  });
+
+
   const handleChange = (e) => {
     setState({ ...state, [e.target.name]: e.target.value });
   };
 
-//   const handleUpdate = (e) => {
-//     setUpdateVeri([{...updateVeri,[e.target.name] : e.target.value}])
-//   }
+  const handleUpdate = (e) => {
+    setUpdateVeri({ ...updateVeri, [e.target.name]: e.target.value });
+  };
 
-  const handlePost = () => {
-    axios({
+  const getAxios = async () => {
+    await axios
+      .get(url)
+      .then((data) => setVeri(data.data))
+      .catch((err) => console.log(err));
+  };
+
+
+  const handlePost = async () => {
+    await axios({
       method: "post",
       url: url,
       data: {
@@ -29,32 +44,38 @@ function Main() {
         description: state.desc,
       },
     });
-    setState({
+    await setState({
       title: "",
       desc: "",
     });
+    await getAxios();
+    await setDidupdate(!didupdate);
   };
 
-  const handleDelete = (Id) => {
-    console.log(Id);
-    axios.delete(`https://axios-example-cw.herokuapp.com/api/tutorials/${Id}`);
+
+
+  const handleDelete = async (Id) => {
+    await axios.delete(
+      `https://axios-example-cw.herokuapp.com/api/tutorials/${Id}`
+    );
+    await getAxios();
+    await setDidupdate(!didupdate);
   };
 
-//   const handlePut = (Id) => {
-//     axios.put(`https://axios-example-cw.herokuapp.com/api/tutorials/${Id}`,{title:"merhaba",description:"dünya"}).then((data) => console.log(data))
-//   }
 
-  const getAxios = async() => {
-    await axios
-    .get(url)
-    .then((data) => setVeri(data.data))
-    .catch((err) => console.log(err));
-  }
 
-//   const handleUpdateRouter = (Id) => {
-//     setUpdateVeri(veri?.filter((item) => item.id === Id));
-//     console.log(updateVeri);
-//   }
+  const handlePut = async (id) => {
+    await axios.put(
+      `https://axios-example-cw.herokuapp.com/api/tutorials/${id}`,
+      { title: updateVeri.title, description: updateVeri.description }
+    );
+    await getAxios();
+    await setDidupdate(!didupdate);
+  };
+
+  const handleUpdateRouter = (Id) => {
+    setUpdateVeri(...veri?.filter((item) => item.id === Id));
+  };
 
   //didmount
   useEffect(() => {
@@ -64,7 +85,7 @@ function Main() {
   //updatemount
   useEffect(() => {
     getAxios();
-  },[veri])
+  }, [didupdate]);
 
   return (
     <div>
@@ -78,8 +99,18 @@ function Main() {
           gap: "2rem",
         }}
       >
-        <input type="text" name="title" onChange={handleChange} value={state.title}/>
-        <input type="text" name="desc" onChange={handleChange} value={state.desc}/>
+        <input
+          type="text"
+          name="title"
+          onChange={handleChange}
+          value={state.title}
+        />
+        <input
+          type="text"
+          name="desc"
+          onChange={handleChange}
+          value={state.desc}
+        />
         <button onClick={handlePost}>Ekle</button>
       </div>
       <div style={{ margin: "auto" }}>
@@ -100,7 +131,18 @@ function Main() {
                   <td>{item.title}</td>
                   <td>{item.description}</td>
                   <td>
-                    <span style={{cursor:"pointer"}} >+</span> <span style={{cursor:"pointer"}} onClick={() => handleDelete(item.id)}>x</span>
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleUpdateRouter(item.id)}
+                    >
+                      +
+                    </span>{" "}
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      x
+                    </span>
                   </td>
                 </tr>
               );
@@ -108,7 +150,7 @@ function Main() {
           </tbody>
         </table>
       </div>
-      {/* <div
+      <div
         style={{
           display: "flex",
           flexDirection: "column",
@@ -117,10 +159,20 @@ function Main() {
           gap: "2rem",
         }}
       >
-        <input type="text" name="title" value={updateVeri[0].title} onChange={handleUpdate}/>
-        <input type="text" name="desc" value={updateVeri[0].description} onChange={handleUpdate}/>
-        <button onClick={handlePost}>Güncelle</button>
-      </div> */}
+        <input
+          type="text"
+          name="title"
+          value={updateVeri.title}
+          onChange={handleUpdate}
+        />
+        <input
+          type="text"
+          name="description"
+          value={updateVeri.description}
+          onChange={handleUpdate}
+        />
+        <button onClick={() => handlePut(updateVeri.id)}>Güncelle</button>
+      </div>
     </div>
   );
 }
